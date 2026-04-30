@@ -1,6 +1,6 @@
 # Online Examination System — Attempt Exam Subsystem
 
-**Course:** Software Engineering (R5IT2009T)
+**Course:** Software Engineering
 **Student:** Anushree Upasham | **ID:** 241071077
 
 ---
