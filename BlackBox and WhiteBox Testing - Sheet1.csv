@@ -1,0 +1,24 @@
+#,Description,Technique,Input,Expected output
+Exam duration — EC1 valid | EC2–EC3 invalid,,,,
+TC-01,Valid duration — typical value,ECP EC1,duration = 60,ExamSchedule and Exam created without exception
+TC-02,Invalid duration — zero,ECP EC2,duration = 0,InvalidExamDurationException raised
+TC-03,Invalid duration — large negative,ECP EC3,duration = −10,InvalidExamDurationException raised
+TC-04,Boundary — minimum valid (1 min),BVA EC1,duration = 1,Exam created; duration_minutes == 1
+TC-05,Boundary — exactly zero,BVA EC2,duration = 0,InvalidExamDurationException raised
+TC-06,Boundary — just below zero (−1),BVA EC3,duration = −1,InvalidExamDurationException raised
+TC-07,Valid large duration — end_time check,BVA EC1,duration = 120,end_time == start_time + 120 min (within 1s)
+Re-attempt constraints — EC4 allowed | EC5–EC6 blocked,,,,
+TC-08,Re-attempt not allowed — 2nd try rejected,ECP EC5,"allow_reattempt=False, attempts=1",ExamAlreadyAttemptedException raised
+TC-09,"Re-attempt allowed — within limit (max=1, attempts=1)",ECP EC4,"allow_reattempt=True, max=1, attempts=1",Session created; no exception
+TC-10,"Boundary — at exact re-attempt limit (max=1, attempts=1)",BVA EC4,"allow_reattempt=True, max=1, attempts=1",Re-attempt allowed; no exception
+TC-11,"Boundary — one over limit (max=1, attempts=2)",BVA EC6,"allow_reattempt=True, max=1, attempts=2",ReAttemptNotAllowedException raised
+TC-12,Flag allows re-attempt but max=0; 2nd try blocked,ECP EC6,"allow_reattempt=True, max=0, attempts=1",ReAttemptNotAllowedException raised
+TC-13,"Boundary — at limit max=2, attempts=2",BVA EC4,"allow_reattempt=True, max=2, attempts=2",Re-attempt allowed; no exception
+TC-14,"Boundary — just over limit (max=2, attempts=3)",BVA EC6,"allow_reattempt=True, max=2, attempts=3",ReAttemptNotAllowedException raised
+Combined + interactive system,,,,
+TC-15,Valid duration but exam window already closed,ECP EC1+EC5,"duration=90, window closed (3 h ago)",ExamWindowClosedException raised
+TC-16,Valid OTP → session created in IN_PROGRESS state,ECP OTP-EC1,otp = freshly generated correct value,ExamSession created; status == IN_PROGRESS
+TC-17,Invalid OTP → InvalidOTPException raised,ECP OTP-EC2,"otp = ""000000"" (wrong)",InvalidOTPException raised
+TC-18,"2 tab-switch events — warning only, session continues",ECP MAL-EC1,flag_malpractice() × 2; threshold = 3,malpractice_count==2; status still IN_PROGRESS
+TC-19,3rd tab-switch → session terminated,ECP MAL-EC2,flag_malpractice() × 3,MalpracticeException raised; status == MALPRACTICE_FLAGGED
+TC-20,System failure → partial save returns answered Q IDs,ECP SYS-EC1,"1 answer recorded, then handle_system_failure()",status==PARTIAL_SAVE; saved list contains answered QID
