@@ -1,0 +1,21 @@
+whitebox,,,,
+#,Description,Coverage type,Input / scenario,Expected output
+Statement coverage — every key assignment executes at least once,,,,
+WB-01,ExamSchedule.__init__ — all assignment statements execute,Statement,duration=45 (valid),"start_time, duration_minutes, end_time all correctly assigned"
+WB-02,Student.__init__ — all 5 attribute statements execute,Statement,"Valid student data (sid=""S999"")",5 attributes set; attempted_exams initialised to []
+WB-03,ExamSession.__init__ — all 8 fields initialised,Statement,Valid student + active exam,"session_id, questions_ordered, responses, status, start_timestamp, submit_timestamp, malpractice_count, browser_lock all set"
+Branch coverage — true and false outcome for every conditional,,,,
+WB-04,is_active() — True branch (window open),Branch,"start=now−5 min, duration=120 min",is_active() returns True
+WB-05,is_active() — False branch (window closed),Branch,"start=now−3 h, duration=60 min",is_active() returns False
+WB-06,select_exam() — not-enrolled branch → PermissionError,Branch,"student.courses=[""CS101""], exam.course=""R5IT2009T""",PermissionError raised via not-enrolled branch
+WB-07,select_exam() — first attempt (count=0) → success branch,Branch,attempt_count=0,select_exam returns exam object; no exception
+WB-08,Response.evaluate() — MCQ correct → full marks branch,Branch,QuestionType.MCQ; answer == correct_answer; marks=4,marks_awarded == 4
+WB-09,Response.evaluate() — non-MCQ → manual grading branch,Branch,QuestionType.SHORT; any answer,marks_awarded == None (pending manual grading)
+Path coverage — distinct complete execution paths through multi-decision methods,,,,
+WB-10,verify_otp() — Path A: no OTP record → early exit,Path,verify called without send_otp(); _store is empty,"InvalidOTPException raised at ""no-record"" guard"
+WB-11,verify_otp() — Path B: correct OTP → True + record deleted,Path,Correct OTP entered on 1st attempt,Returns True; OTP record removed (2nd verify raises exception)
+WB-12,flag_malpractice() — Path A (warn ×2) + Path B (terminate on 3rd),Path,3 successive flag_malpractice() calls,"Calls 1–2: count increments, session stays IN_PROGRESS; call 3: MalpracticeException + status==MALPRACTICE_FLAGGED"
+Loop coverage — zero / one / many iterations of partial_save comprehension,,,,
+WB-13,partial_save loop — 0 iterations (nothing answered),Loop,3-question exam; 0 answers recorded,saved == []; status == PARTIAL_SAVE
+WB-14,partial_save loop — 1 iteration (exactly one answer),Loop,3-question exam; 1 answer recorded (Q1),saved == [Q1 id]; length == 1
+WB-15,partial_save loop — N iterations (all 3 answered),Loop,3-question exam; all 3 answers recorded,saved contains all 3 QIDs; length == 3
